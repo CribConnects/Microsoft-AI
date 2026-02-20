@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft AI Strategy Navigator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#0071e3;
+  --blue-dk:#0058b0;
+  --black:#1d1d1f;
+  --gray-2:#3d3d3f;
+  --gray-6:#6e6e73;
+  --gray-9:#aeaeb2;
+  --gray-b:#f5f5f7;
+  --gray-e:#e8e8ed;
+  --white:#fff;
+  --border:rgba(0,0,0,0.08);
+  --border-m:rgba(0,0,0,0.14);
+  --shadow-l:0 8px 40px rgba(0,0,0,0.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:'Figtree',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--white);color:var(--black);overflow-x:hidden;letter-spacing:-0.01em}
+
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;height:52px;
+  background:rgba(255,255,255,0.85);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;
+}
+.nav-brand{font-size:13px;font-weight:700;letter-spacing:-0.02em;color:var(--black);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.nav-inner{display:flex;align-items:center;gap:0.4rem;overflow-x:auto;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-btn{
+  font-family:inherit;font-size:12px;font-weight:600;letter-spacing:-0.01em;
+  padding:7px 14px;border:1px solid transparent;border-radius:980px;
+  background:none;cursor:pointer;color:var(--gray-6);white-space:nowrap;
+  transition:all .18s;
+}
+.nav-btn:hover{color:var(--black);border-color:var(--border-m)}
+.nav-btn.active{background:rgba(0,113,227,.1);color:var(--blue);border-color:rgba(0,113,227,.22)}
+
+.hero{
+  min-height:100svh;padding:0 40px;text-align:center;
+  background:var(--black);position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.hero-inner{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transform:translateY(-4vh);
+}
+.hero-glow{
+  position:absolute;width:800px;height:500px;border-radius:50%;top:5%;left:50%;transform:translateX(-50%);
+  background:radial-gradient(ellipse,rgba(0,113,227,.16) 0%,transparent 70%);z-index:0;pointer-events:none;
+}
+.hero-grid{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 70% 70% at 50% 30%,black 20%,transparent 80%);
+}
+.hero>*{position:relative;z-index:1}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.5rem;padding:.3rem 1rem;border-radius:980px;
+  border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);
+  font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.45);
+  margin-bottom:.8rem;
+}
+.hero-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--blue);box-shadow:0 0 6px var(--blue);animation:blink 2.4s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hero-title{font-size:clamp(44px,9.5vw,104px);font-weight:900;color:var(--white);line-height:0.98;letter-spacing:-0.03em;margin-bottom:12px;text-align:center}
+.hero-title span{color:var(--blue)}
+.hero-sub{font-size:18px;font-weight:400;color:rgba(255,255,255,.5);max-width:620px;margin:0 auto 14px;line-height:1.62;text-align:center}
+.hero-view-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:16px}
+.hero-view-btn{
+  font-family:inherit;padding:14px 26px;border-radius:980px;border:1px solid rgba(255,255,255,.26);
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.82);font-size:15px;font-weight:700;
+  letter-spacing:.02em;cursor:pointer;transition:all .18s;
+}
+.hero-view-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.hero-view-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+
+.main{max-width:1100px;margin:0 auto;padding:84px 24px 100px}
+.view{
+  display:none;animation:appear .35s ease;background:var(--white);border:1px solid var(--border);
+  border-radius:24px;padding:40px;margin-bottom:24px;
+}
+.view.active{display:block}
+@keyframes appear{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.section-eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.section-title{font-size:clamp(32px,4vw,44px);font-weight:800;letter-spacing:-0.03em;color:var(--black);margin-bottom:10px}
+.section-desc{font-size:15px;color:var(--gray-6);line-height:1.65;max-width:640px;margin-bottom:38px}
+
+.chart-wrap{overflow-x:auto;border-radius:18px;background:var(--gray-b);border:1px solid var(--border);padding:36px 26px}
+.chart-wrap svg{display:block;margin:0 auto}
+.fc-node{cursor:pointer}
+.fc-node rect,.fc-node polygon{transition:filter .2s}
+.fc-node:hover rect,.fc-node:hover polygon{filter:drop-shadow(0 6px 20px rgba(0,113,227,.28))}
+
+.decision-shell{border-radius:20px;background:#fff;border:1px solid var(--border);padding:26px}
+.decision-intro{font-size:14px;color:var(--gray-6);line-height:1.65;margin-bottom:18px}
+.tree-head{
+  padding:4px 2px 12px;margin-bottom:14px;
+}
+.tree-progress{display:flex;gap:6px;margin-bottom:14px}
+.tree-seg{flex:1;height:4px;border-radius:8px;background:var(--gray-e);transition:background .22s}
+.tree-seg.done{background:var(--blue)}
+.tree-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+.tree-title{font-size:30px;font-weight:800;letter-spacing:-.03em;color:var(--black);line-height:1.15;margin-bottom:8px}
+.tree-sub{font-size:14px;color:var(--gray-6);line-height:1.6}
+.decision-tree{display:flex;flex-direction:column;gap:18px}
+.decision-root{
+  background:var(--white);border:1px solid var(--border);border-radius:18px;padding:24px;
+}
+.decision-root-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;margin-bottom:24px;position:relative}
+.decision-root-options::before{content:none}
+.decision-root-opt{
+  font-family:inherit;border:1px solid var(--border);background:var(--white);color:var(--black);padding:22px 20px;
+  border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;transition:all .18s;text-align:left;position:relative;z-index:1;
+}
+.decision-root-opt:hover{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,113,227,.1);transform:translateY(-2px)}
+.decision-root-opt.active{background:rgba(0,113,227,.08);border-color:rgba(0,113,227,.32);color:var(--blue)}
+.decision-root-opt.active::before{
+  content:'';position:absolute;left:50%;transform:translateX(-50%);bottom:-30px;width:3px;height:18px;background:rgba(0,113,227,.4);border-radius:99px;
+}
+.decision-split{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.decision-branch{
+  border:1px solid var(--border);border-radius:18px;padding:16px;background:rgba(255,255,255,.65);
+}
+.decision-branch.active{border-color:rgba(0,113,227,.32);background:rgba(0,113,227,.08)}
+.decision-branch.inactive{opacity:.3;filter:saturate(.7)}
+.decision-branch-label{
+  font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--gray-6);
+  margin-bottom:12px;padding:0 2px;
+}
+.decision-node{
+  background:var(--white);border:1px solid var(--border);border-radius:16px;padding:22px;
+  animation:appear .22s ease;margin-bottom:30px;position:relative;
+}
+.decision-node:last-child{margin-bottom:0}
+.decision-node.has-child::after{
+  content:'';position:absolute;left:50%;transform:translateX(-50%);bottom:-22px;width:3px;height:14px;background:rgba(0,113,227,.35);border-radius:99px;
+}
+.decision-node.current{
+  border-color:rgba(0,113,227,.35);
+  box-shadow:0 0 0 3px rgba(0,113,227,.12);
+}
+.decision-step{font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+.decision-q{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
+.decision-sub{font-size:15px;color:var(--gray-6);line-height:1.6;margin-bottom:14px}
+.decision-options{display:flex;gap:10px;flex-wrap:wrap}
+.decision-opt{
+  font-family:inherit;border:1px solid var(--border-m);background:#fff;color:var(--gray-2);padding:12px 16px;
+  border-radius:980px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.decision-opt:hover{border-color:var(--blue);color:var(--blue)}
+.decision-opt.selected{background:rgba(0,113,227,.1);border-color:rgba(0,113,227,.25);color:var(--blue)}
+.decision-opt:disabled{opacity:.55;cursor:not-allowed}
+.decision-result{border-left:4px solid var(--blue)}
+.decision-result h4{font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:6px}
+.decision-result p{font-size:15px;color:var(--gray-6);line-height:1.6;margin-bottom:10px}
+.decision-result-actions{display:flex;gap:8px;flex-wrap:wrap}
+.decision-reco-full{
+  border:1px solid rgba(0,113,227,.25);border-radius:20px;padding:16px;background:#fff;box-shadow:0 8px 30px rgba(0,113,227,.08);
+}
+.decision-reco-full .result-hero{margin-bottom:12px}
+.decision-reco-full .result-grid{margin-bottom:0}
+.decision-link{
+  font-family:inherit;border:none;background:none;color:var(--blue);font-size:12px;font-weight:700;
+  cursor:pointer;padding:0;
+}
+.decision-link:hover{text-decoration:underline}
+.decision-actions{margin-top:12px}
+.decision-reset{
+  font-family:inherit;padding:9px 14px;border-radius:980px;border:1px solid var(--border-m);
+  background:#fff;color:var(--gray-2);font-size:12px;font-weight:600;cursor:pointer;
+}
+.decision-reset:hover{border-color:var(--blue);color:var(--blue)}
+
+.info-drawer{
+  margin-top:20px;padding:22px 24px;border-radius:16px;background:var(--white);border:1px solid var(--border);
+  display:none;align-items:flex-start;gap:16px;animation:appear .2s ease;
+}
+.info-drawer.open{display:flex}
+.info-drawer-icon{font-size:24px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--gray-b);flex-shrink:0}
+.info-drawer-body{flex:1}
+.info-drawer-title{font-size:16px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px}
+.info-drawer-text{font-size:13px;color:var(--gray-6);line-height:1.65}
+.info-close{background:none;border:none;color:var(--gray-9);cursor:pointer;font-size:18px;line-height:1;padding:4px;align-self:flex-start;transition:color .15s}
+.info-close:hover{color:var(--black)}
+
+.spectrum-track{height:3px;border-radius:3px;background:linear-gradient(90deg,#0071e3 0%,#bf5af2 50%,#30d158 100%);margin-bottom:8px;opacity:.55}
+.spectrum-ends{display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--gray-9);letter-spacing:.06em;text-transform:uppercase;margin-bottom:32px}
+.tier-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:36px}
+.tier-card{border-radius:16px;border:1px solid var(--border);overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:pointer;background:var(--white)}
+.tier-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-l)}
+.tier-top{padding:20px 18px 15px;border-bottom:1px solid var(--border)}
+.tier-num{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.tier-name{font-size:13px;font-weight:700;letter-spacing:-.02em;color:var(--black);margin-bottom:3px}
+.tier-type{font-size:11px;color:var(--gray-9)}
+.tier-body{padding:14px 18px}
+.tier-row-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--gray-6);line-height:1.5;padding:5px 0;border-bottom:1px solid var(--border)}
+.tier-row-item:last-child{border-bottom:none}
+.tier-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.t1 .tier-num{color:#0071e3}.t1 .tier-dot{background:#0071e3}
+.t2 .tier-num{color:#bf5af2}.t2 .tier-dot{background:#bf5af2}
+.t3 .tier-num{color:#8944ab}.t3 .tier-dot{background:#8944ab}
+.t4 .tier-num{color:#004aad}.t4 .tier-dot{background:#004aad}
+
+.table-wrap{border-radius:16px;border:1px solid var(--border);overflow:auto;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:14px 16px;background:var(--gray-b);text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-6);border-bottom:1px solid var(--border)}
+td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--gray-6);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--gray-b)}
+td.row-label{font-weight:600;color:var(--gray-2)}
+.cap{display:inline-flex;align-items:center;gap:5px}
+.cap-full{color:#30d158}.cap-partial{color:#ff9f0a}.cap-none{color:var(--gray-9)}
+.cap-dot{font-size:16px;line-height:1}
+
+.interop-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+.interop-card{border-radius:16px;padding:20px;border:1px solid var(--border)}
+.interop-title{font-size:13px;font-weight:700;letter-spacing:-0.01em;margin-bottom:8px}
+.interop-text{font-size:13px;color:var(--gray-6);line-height:1.6}
+.interop-good{background:#f2fff7;border-color:rgba(48,209,88,.2)}.interop-good .interop-title{color:#1a7f37}
+.interop-bad{background:var(--gray-b)}.interop-bad .interop-title{color:var(--gray-2)}
+.tip-box{border-radius:16px;padding:20px 24px;background:rgba(0,113,227,.04);border:1px solid rgba(0,113,227,.15)}
+.tip-box p{font-size:13px;color:var(--gray-2);line-height:1.7}
+.tip-box strong{color:var(--blue);font-weight:700}
+
+.quiz-shell{max-width:700px;margin:0 auto}
+.q-progress{display:flex;gap:5px;margin-bottom:32px}
+.q-step{flex:1;height:3px;border-radius:3px;background:var(--gray-e);transition:background .3s}
+.q-step.done{background:var(--blue)}
+.q-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.q-title{font-size:36px;font-weight:800;letter-spacing:-.03em;color:var(--black);margin-bottom:8px;line-height:1.15}
+.q-sub{font-size:13px;color:var(--gray-6);margin-bottom:30px;line-height:1.6}
+.q-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.q-opt{padding:22px 20px;border-radius:16px;border:1px solid var(--border);background:var(--white);cursor:pointer;text-align:left;font-family:inherit;transition:border-color .2s,box-shadow .2s,transform .18s}
+.q-opt:hover{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,113,227,.1);transform:translateY(-2px)}
+.q-opt-icon{font-size:26px;margin-bottom:12px;display:block}
+.q-opt-title{font-size:15px;font-weight:700;letter-spacing:-.02em;color:var(--black);margin-bottom:4px}
+.q-opt-desc{font-size:11px;color:var(--gray-6);line-height:1.55}
+
+.result-hero{border-radius:20px;background:var(--black);padding:48px 36px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden}
+.result-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 60% 40%,rgba(0,113,227,.22) 0%,transparent 70%);pointer-events:none}
+.result-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:14px;position:relative}
+.result-name{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-.03em;color:#f5f5f7;margin-bottom:14px;position:relative}
+.result-desc{font-size:13px;color:rgba(255,255,255,.45);max-width:420px;margin:0 auto;line-height:1.65;position:relative}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.result-card{border-radius:16px;padding:20px;border:1px solid var(--border);background:var(--white)}
+.result-card-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-9);margin-bottom:10px}
+.result-card-val{font-size:13px;color:var(--gray-2);line-height:1.6}
+.result-card-val strong{color:var(--black)}
+.steps{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.step{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--gray-6)}
+.step-n{width:20px;height:20px;border-radius:50%;flex-shrink:0;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.btn-reset{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:980px;background:var(--blue);color:#fff;font-family:inherit;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:background .2s,transform .18s;letter-spacing:-.01em}
+.btn-reset:hover{background:var(--blue-dk);transform:translateY(-1px)}
+
+.footer{text-align:center;padding:34px 24px;border-top:1px solid var(--border);font-size:11px;color:var(--gray-9);letter-spacing:.04em}
+
+@media(max-width:900px){
+  .nav{padding:0 1rem}
+  .hero{min-height:100svh;padding:0 24px}
+  .hero-inner{transform:translateY(-3vh)}
+  .hero-title{font-size:clamp(40px,11vw,74px)}
+  .hero-view-btn{padding:13px 22px;font-size:14px}
+  .view{padding:26px}
+  .tier-row{grid-template-columns:1fr 1fr}
+  .result-grid,.q-grid,.interop-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .main{padding:74px 14px 70px}
+  .view{border-radius:18px;padding:20px}
+  .tree-title{font-size:24px}
+  .section-title{font-size:30px}
+  .q-title{font-size:30px}
+  .spectrum-ends{font-size:10px}
+  .tier-row{grid-template-columns:1fr}
+  .decision-root-options,.decision-split{grid-template-columns:1fr}
+  .nav-brand{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <span class="hero-badge"><span class="hero-badge-dot"></span> Strategy Framework</span>
+    <h1 class="hero-title"><span>Microsoft AI</span><br>Strategy Navigator</h1>
+    <p class="hero-sub">A structured framework for choosing the right AI platform — from no‑code productivity to enterprise‑grade development.</p>
+    <div class="hero-view-row">
+      <button class="hero-view-btn active" data-view="flow" onclick="switchView('flow',this)">Decision Flow</button>
+      <button class="hero-view-btn" data-view="spectrum" onclick="switchView('spectrum',this)">Technology Spectrum</button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav">
+  <a class="nav-brand" href="#"><span class="nav-dot"></span>CribConnects</a>
+  <div class="nav-inner">
+    <button class="nav-btn active" data-view="flow" onclick="switchView('flow',this)">Decision Flow</button>
+    <button class="nav-btn" data-view="spectrum" onclick="switchView('spectrum',this)">Technology Spectrum</button>
+  </div>
+</nav>
+
+<main class="main" id="main-content">
+
+  <!-- VIEW 1: FLOW -->
+  <div id="view-flow" class="view active">
+    <p class="section-eyebrow">Visual Decision Tree</p>
+    <h2 class="section-title">Which platform fits?</h2>
+    <p class="section-desc">Pick one option at each step. New branches appear as you choose, leading to a recommendation in plain language.</p>
+
+    <div class="decision-shell">
+      <p class="decision-intro">Start with your goal, then follow the next question that appears.</p>
+      <div class="tree-head">
+        <div class="tree-progress" id="tree-prog"></div>
+        <p class="tree-label" id="tree-step-label"></p>
+        <h3 class="tree-title" id="tree-title"></h3>
+        <p class="tree-sub" id="tree-sub"></p>
+      </div>
+      <div class="decision-tree" id="decision-tree"></div>
+      <div class="decision-actions"><button class="decision-reset" onclick="resetDecisionTree()">Start over</button></div>
+    </div>
+
+    <div class="info-drawer" id="info-drawer">
+      <div class="info-drawer-icon" id="drawer-icon"></div>
+      <div class="info-drawer-body">
+        <p class="info-drawer-title" id="drawer-title"></p>
+        <p class="info-drawer-text"  id="drawer-text"></p>
+      </div>
+      <button class="info-close" onclick="closeDrawer()">✕</button>
+    </div>
+  </div>
+
+  <!-- VIEW 2: SPECTRUM -->
+  <div id="view-spectrum" class="view">
+    <p class="section-eyebrow">Technology Spectrum</p>
+    <h2 class="section-title">Complexity vs. Control</h2>
+    <p class="section-desc">Four tiers from no-code simplicity to full pro-dev customization. Choose based on who builds and what you need to control.</p>
+
+    <div class="spectrum-track"></div>
+    <div class="spectrum-ends"><span>← No-Code (minutes)</span><span>Code-First (months) →</span></div>
+
+    <div class="tier-row">
+      <div class="tier-card t1" onclick="showInfo('m365')">
+        <div class="tier-top"><div class="tier-num">L1</div><div class="tier-name">Agent Builder</div><div class="tier-type">M365 · No-Code</div></div>
+        <div class="tier-body">
+          <div class="tier-row-item"><span class="tier-dot"></span>End-users build agents</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>M365 knowledge only</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>Fixed GPT-4o model</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>M365 apps only</div>
+        </div>
+      </div>
+      <div class="tier-card t2" onclick="showInfo('studio')">
+        <div class="tier-top"><div class="tier-num">L2</div><div class="tier-name">Copilot Studio (guided)</div><div class="tier-type">SaaS · Low-Code</div></div>
+        <div class="tier-body">
+          <div class="tier-row-item"><span class="tier-dot"></span>IT Admins &amp; Makers</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>M365 + 1,000+ connectors</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>Full instructions</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>Teams + M365</div>
+        </div>
+      </div>
+      <div class="tier-card t3" onclick="showInfo('studio')">
+        <div class="tier-top"><div class="tier-num">L3</div><div class="tier-name">Copilot Studio (advanced)</div><div class="tier-type">SaaS · Low-Code+</div></div>
+        <div class="tier-body">
+          <div class="tier-row-item"><span class="tier-dot"></span>Hybrid IT + Dev teams</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>Any data via API</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>Bring-Your-Own-Model</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>Multi-channel deploy</div>
+        </div>
+      </div>
+      <div class="tier-card t4" onclick="showInfo('foundry')">
+        <div class="tier-top"><div class="tier-num">L4</div><div class="tier-name">Foundry</div><div class="tier-type">PaaS · Code-First</div></div>
+        <div class="tier-body">
+          <div class="tier-row-item"><span class="tier-dot"></span>Data Scientists &amp; Devs</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>Unlimited data sources</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>11,000+ model catalog</div>
+          <div class="tier-row-item"><span class="tier-dot"></span>Deploy anywhere</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th style="color:#0071e3">Agent Builder</th>
+            <th style="color:#bf5af2">CS Declarative</th>
+            <th style="color:#8944ab">CS Custom</th>
+            <th style="color:#004aad">Foundry</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="row-label">System Instructions</td><td><span class="cap cap-partial"><span class="cap-dot">◐</span> Limited</span></td><td><span class="cap cap-full"><span class="cap-dot">●</span> Full</span></td><td><span class="cap cap-full"><span class="cap-dot">●</span> Full</span></td><td><span class="cap cap-full"><span class="cap-dot">●</span> Full</span></td></tr>
+          <tr><td class="row-label">Knowledge Sources</td><td><span class="cap cap-partial"><span class="cap-dot">◐</span> M365 only</span></td><td><span class="cap cap-partial"><span class="cap-dot">◐</span> M365 + Connectors</span></td><td><span class="cap cap-full"><span class="cap-dot">●</span> Any via API</span></td><td><span class="cap cap-full"><span class="cap-dot">●</span> Unlimited</span></td></tr>
+          <tr><td class="row-label">Model Selection</td><td><span class="cap cap-none"><span class="cap-dot">○</span> Fixed</span></td><td><span class="cap cap-none"><span class="cap-dot">○</span> Fixed</span></td><td><span class="cap cap-partial"><span class="cap-dot">◐</span> BYOM (limited)</span></td><td><span class="cap cap-full"><span class="cap-dot">●</span> 11,000+ models</span></td></tr>
+          <tr><td class="row-label">Deployment Channels</td><td><span class="cap cap-none"><span class="cap-dot">○</span> M365 only</span></td><td><span class="cap cap-partial"><span class="cap-dot">◐</span> M365 + Teams</span></td><td><span class="cap cap-partial"><span class="cap-dot">◐</span> Multi-channel</span></td><td><span class="cap cap-full"><span class="cap-dot">●</span> Anywhere</span></td></tr>
+          <tr><td class="row-label">Custom Code</td><td><span class="cap cap-none"><span class="cap-dot">○</span> None</span></td><td><span class="cap cap-none"><span class="cap-dot">○</span> None</span></td><td><span class="cap cap-partial"><span class="cap-dot">◐</span> Power Automate</span></td><td><span class="cap cap-full"><span class="cap-dot">●</span> Full Python / SDK</span></td></tr>
+          <tr><td class="row-label">Time to Deploy</td><td><span class="cap cap-full"><span class="cap-dot">●</span> Minutes</span></td><td><span class="cap cap-partial"><span class="cap-dot">◐</span> Hours–Days</span></td><td><span class="cap cap-partial"><span class="cap-dot">◐</span> Days–Weeks</span></td><td><span class="cap cap-none"><span class="cap-dot">○</span> Weeks–Months</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="interop-grid">
+      <div class="interop-card interop-good"><p class="interop-title">✅ Foundry → Copilot Studio</p><p class="interop-text">Connect Foundry agents to Studio via A2A protocol. One-click publishing to Microsoft 365. Fully supported.</p></div>
+      <div class="interop-card interop-bad"><p class="interop-title">✕ Copilot Studio → Foundry</p><p class="interop-text">No direct export path. Assets must be manually rebuilt for Foundry. Start with Foundry if enterprise migration is expected.</p></div>
+    </div>
+
+    <div class="tip-box"><p>Recommended approach: adopt a <strong>hybrid strategy</strong> — empower business users with <strong>Copilot Studio</strong> for rapid prototyping, while reserving <strong>Microsoft Foundry</strong> for complex, mission-critical agents requiring custom models or enterprise backend integration.</p></div>
+  </div>
+
+</main>
+
+<footer class="footer">Microsoft AI Strategy Navigator &nbsp;·&nbsp; Built with CribConnects</footer>
+
+<script>
+const info={start:{e:'🎯',t:'Start with your goal',d:'Begin by defining what success looks like. Do you want people to work faster, or do you want to automate a process?'},d1:{e:'🔀',t:'Two simple paths',d:'One path helps employees inside Microsoft 365. The other path builds agents and workflows that can run tasks for you.'},d_org:{e:'🏢',t:'Company-wide assistant',d:'If you want one consistent assistant for many employees, M365 Copilot Agent Builder is usually the quickest fit.'},m365:{e:'💼',t:'M365 Copilot Agent Builder',d:'Best when non-technical teams need fast productivity help in Microsoft 365. Setup is simple and can be done quickly.'},d_product:{e:'🔌',t:'Already inside a Microsoft app?',d:'If your team already works mainly in one Microsoft product, that product’s built-in Copilot is often the easiest choice.'},prod_copilot:{e:'⚙️',t:'Built-in Product Copilots',d:'Use the Copilot included in apps like Dynamics, Power BI, or GitHub when your work stays in that product.'},d_studio:{e:'🛠️',t:'Low-code builder',d:'Copilot Studio lets business and IT teams build agents with guided tools and connectors, without heavy coding.'},studio:{e:'🟣',t:'Microsoft Copilot Studio',d:'Great for low-code agent experiences across Teams and Microsoft 365, with strong connector support.'},d_foundry:{e:'💻',t:'Developer-led build',d:'Choose this when you need engineers to create custom AI behavior, deeper integrations, or advanced control.'},foundry:{e:'🔵',t:'Microsoft Foundry (Azure AI)',d:'Best for advanced, custom AI apps. Developer teams can choose models, write code, and deploy anywhere.'},d_openai:{e:'🔑',t:'Direct model API',d:'Use Azure OpenAI when you mainly need secure model access in your existing app, without a full agent platform.'},openai:{e:'🌐',t:'Azure OpenAI Service',d:'Secure API access to models for enterprise apps. A strong fit when your own app already handles the user experience.'},d_ml:{e:'🧪',t:'Train your own model',d:'Choose Azure Machine Learning if your team needs model training pipelines and full machine-learning operations.'},aml:{e:'🔬',t:'Azure Machine Learning',d:'Built for data science teams that need custom model training, deployment, and monitoring at scale.'}};
+
+function showInfo(id){const d=info[id];if(!d)return;document.getElementById('drawer-icon').textContent=d.e;document.getElementById('drawer-title').textContent=d.t;document.getElementById('drawer-text').textContent=d.d;const dr=document.getElementById('info-drawer');dr.classList.add('open');dr.scrollIntoView({behavior:'smooth',block:'nearest'})}
+function closeDrawer(){document.getElementById('info-drawer').classList.remove('open')}
+
+function switchView(name,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn,.hero-view-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll(`[data-view="${name}"]`).forEach(b=>b.classList.add('active'));
+  if(btn)btn.classList.add('active');
+  const main=document.getElementById('main-content');
+  if(main){main.scrollIntoView({behavior:'smooth',block:'start'})}
+}
+
+const decisionNodes={
+  prod_q1:{type:'q',step:'Left branch',q:'Where should people use this assistant?',sub:'This narrows down whether you need broad Microsoft 365 coverage or one app.',options:[
+    {label:'Across Microsoft 365 for many employees',next:'res_m365'},
+    {label:'Inside one Microsoft product',next:'res_product'}
+  ]},
+  auto_q1:{type:'q',step:'Right branch',q:'Who will build and maintain it?',sub:'Pick the team that will own this after launch.',options:[
+    {label:'Business or IT team with low-code tools',next:'res_studio'},
+    {label:'Developers and data specialists',next:'auto_q2'}
+  ]},
+  auto_q2:{type:'q',step:'Right branch',q:'How much control do you need?',sub:'Choose how far you want to customize your AI solution.',options:[
+    {label:'Secure model API in an existing app',next:'res_openai'},
+    {label:'A fully custom AI app',next:'res_foundry'},
+    {label:'Train and run our own ML models',next:'res_aml'}
+  ]},
+  res_m365:{type:'r',platform:'m365'},
+  res_product:{type:'r',platform:'prod_copilot'},
+  res_studio:{type:'r',platform:'studio'},
+  res_openai:{type:'r',platform:'openai'},
+  res_foundry:{type:'r',platform:'foundry'},
+  res_aml:{type:'r',platform:'aml'}
+};
+const decisionRecommendations={
+  m365:{name:'M365 Copilot Agent Builder',desc:'Best when non-technical teams want quick productivity gains inside Microsoft 365.',cards:[{l:'Best For',v:'Employees who need a fast assistant inside daily M365 tools.'},{l:'Time to Value',v:'<strong>Minutes to hours.</strong> Fastest start.'},{l:'Next Step',v:'Enable Agent Builder and pilot with one team.'}]},
+  prod_copilot:{name:'Built-in Product Copilots',desc:'Best when teams already work in one Microsoft product and want AI in that exact workflow.',cards:[{l:'Best For',v:'Teams centered on apps like Dynamics, GitHub, or Power BI.'},{l:'Time to Value',v:'<strong>Fast.</strong> Mostly configuration and adoption.'},{l:'Next Step',v:'Activate the product Copilot and define usage guardrails.'}]},
+  studio:{name:'Microsoft Copilot Studio',desc:'Best for business/IT teams building guided automations with low-code tools and connectors.',cards:[{l:'Best For',v:'Business + IT owners of operational workflows.'},{l:'Time to Value',v:'<strong>Days to weeks.</strong> Rapid iteration.'},{l:'Next Step',v:'Map one process and build a first production-ready agent.'}]},
+  openai:{name:'Azure OpenAI Service',desc:'Best when you need secure model access in an existing app and control your own UX.',cards:[{l:'Best For',v:'Teams extending an existing internal or customer app.'},{l:'Time to Value',v:'<strong>Days to weeks.</strong> API integration path.'},{l:'Next Step',v:'Integrate one endpoint and test with real production prompts.'}]},
+  foundry:{name:'Microsoft Foundry (Azure AI)',desc:'Best for custom AI applications that need engineering control and flexible architecture.',cards:[{l:'Best For',v:'Developer teams building tailored AI products.'},{l:'Time to Value',v:'<strong>Weeks to months.</strong> Full-build approach.'},{l:'Next Step',v:'Stand up workspace, choose model, and build MVP service.'}]},
+  aml:{name:'Azure Machine Learning',desc:'Best for data science teams training and operating custom ML models at scale.',cards:[{l:'Best For',v:'Organizations with dedicated data science and MLOps needs.'},{l:'Time to Value',v:'<strong>Longer runway.</strong> Specialist workflows.'},{l:'Next Step',v:'Define training pipeline, governance, and deployment lifecycle.'}]}
+};
+let activeBranch=null;
+const branchState={
+  left:[{id:'prod_q1',choice:null}],
+  right:[{id:'auto_q1',choice:null}]
+};
+function getDecisionMeta(){
+  if(!activeBranch){
+    return {
+      step:1,total:4,
+      label:'Step 1 of 4',
+      title:'What do you want AI to help with first?',
+      sub:'Choose a branch to begin. Your path will appear as connected nodes underneath.'
+    };
+  }
+  const path=branchState[activeBranch];
+  const total=activeBranch==='left'?3:4;
+  const step=Math.min(total,1+path.length);
+  const current=decisionNodes[path[path.length-1].id];
+  if(current.type==='r'){
+    return {
+      step,total,
+      label:`Step ${step} of ${total}`,
+      title:'Recommendation ready',
+      sub:'You reached the end of this branch. Review the highlighted recommendation below.'
+    };
+  }
+  return {
+    step,total,
+    label:`Step ${step} of ${total}`,
+    title:current.q,
+    sub:current.sub
+  };
+}
+function renderDecisionHeader(){
+  const meta=getDecisionMeta();
+  document.getElementById('tree-step-label').textContent=meta.label;
+  document.getElementById('tree-title').textContent=meta.title;
+  document.getElementById('tree-sub').textContent=meta.sub;
+  const prog=document.getElementById('tree-prog');
+  prog.innerHTML='';
+  for(let i=1;i<=meta.total;i++){
+    const seg=document.createElement('div');
+    seg.className='tree-seg'+(i<=meta.step?' done':'');
+    prog.appendChild(seg);
+  }
+}
+function renderDecisionNode(nodeId,step,branch,stepIdx,isInactive){
+  const node=decisionNodes[nodeId];
+  const card=document.createElement('div');
+  card.className='decision-node'+(node.type==='r'?' decision-result':'');
+  const path=branchState[branch];
+  const isCurrent=activeBranch===branch && stepIdx===path.length-1;
+  if(isCurrent)card.classList.add('current');
+  if(stepIdx<path.length-1)card.classList.add('has-child');
+  if(node.type==='q'){
+    card.innerHTML=`
+      <div class="decision-step">${node.step}</div>
+      <div class="decision-q">${node.q}</div>
+      <p class="decision-sub">${node.sub}</p>
+    `;
+    const opts=document.createElement('div');
+    opts.className='decision-options';
+    node.options.forEach((opt,optIdx)=>{
+      const b=document.createElement('button');
+      b.className='decision-opt'+(step.choice===optIdx?' selected':'');
+      b.textContent=opt.label;
+      b.disabled=!!isInactive;
+      b.onclick=()=>chooseBranchOption(branch,stepIdx,optIdx);
+      opts.appendChild(b);
+    });
+    card.appendChild(opts);
+  }else{
+    const details=info[node.platform];
+    card.innerHTML=`
+      <div class="decision-step">Recommendation</div>
+      <h4>${details.t}</h4>
+      <p>${details.d}</p>
+    `;
+    const actions=document.createElement('div');
+    actions.className='decision-result-actions';
+    const learn=document.createElement('button');
+    learn.className='decision-link';
+    learn.textContent='Why this choice?';
+    learn.onclick=()=>showInfo(node.platform);
+    const compare=document.createElement('button');
+    compare.className='decision-link';
+    compare.textContent='Compare in Technology Spectrum';
+    compare.onclick=()=>switchView('spectrum');
+    actions.appendChild(learn);
+    actions.appendChild(compare);
+    card.appendChild(actions);
+  }
+  return card;
+}
+function renderBranchColumn(branch){
+  const col=document.createElement('div');
+  const isInactive=activeBranch && activeBranch!==branch;
+  col.className='decision-branch'+(activeBranch===branch?' active':'')+(isInactive?' inactive':'');
+  const label=document.createElement('div');
+  label.className='decision-branch-label';
+  label.textContent=branch==='left'?'Productivity branch':'Automation branch';
+  col.appendChild(label);
+  const path=branchState[branch];
+  path.forEach((step,idx)=>{
+    col.appendChild(renderDecisionNode(step.id,step,branch,idx,isInactive));
+  });
+  return col;
+}
+function renderDecisionRecommendation(platformKey){
+  const data=decisionRecommendations[platformKey];
+  if(!data)return null;
+  const wrap=document.createElement('div');
+  wrap.className='decision-reco-full';
+  wrap.innerHTML=`
+    <div class="result-hero">
+      <span class="result-tag">Recommended Platform</span>
+      <h3 class="result-name">${data.name}</h3>
+      <p class="result-desc">${data.desc}</p>
+    </div>
+    <div class="result-grid">
+      ${data.cards.map(c=>`<div class="result-card"><div class="result-card-label">${c.l}</div><div class="result-card-val">${c.v}</div></div>`).join('')}
+    </div>
+  `;
+  return wrap;
+}
+function renderDecisionTree(){
+  const wrap=document.getElementById('decision-tree');
+  if(!wrap)return;
+  renderDecisionHeader();
+  wrap.innerHTML='';
+  const root=document.createElement('div');
+  root.className='decision-root';
+  root.innerHTML=`
+    <div class="decision-step">Start</div>
+    <div class="decision-q">What do you want AI to help with first?</div>
+    <p class="decision-sub">Choose a path. The tree then expands left and right with follow-up questions.</p>
+  `;
+  const rootOpts=document.createElement('div');
+  rootOpts.className='decision-root-options';
+  const leftBtn=document.createElement('button');
+  leftBtn.className='decision-root-opt'+(activeBranch==='left'?' active':'');
+  leftBtn.textContent='Help employees work faster';
+  leftBtn.onclick=()=>setActiveBranch('left');
+  const rightBtn=document.createElement('button');
+  rightBtn.className='decision-root-opt'+(activeBranch==='right'?' active':'');
+  rightBtn.textContent='Automate a business process';
+  rightBtn.onclick=()=>setActiveBranch('right');
+  rootOpts.appendChild(leftBtn);
+  rootOpts.appendChild(rightBtn);
+  root.appendChild(rootOpts);
+  wrap.appendChild(root);
+  if(!activeBranch)return;
+  const split=document.createElement('div');
+  split.className='decision-split';
+  split.appendChild(renderBranchColumn('left'));
+  split.appendChild(renderBranchColumn('right'));
+  wrap.appendChild(split);
+  const activePath=branchState[activeBranch];
+  const activeLast=decisionNodes[activePath[activePath.length-1].id];
+  if(activeLast&&activeLast.type==='r'){
+    const reco=renderDecisionRecommendation(activeLast.platform);
+    if(reco)wrap.appendChild(reco);
+  }
+}
+function setActiveBranch(branch){
+  activeBranch=branch;
+  renderDecisionTree();
+}
+function chooseBranchOption(branch,stepIndex,optIndex){
+  activeBranch=branch;
+  const path=branchState[branch];
+  const step=path[stepIndex];
+  const node=decisionNodes[step.id];
+  if(!node||node.type!=='q')return;
+  step.choice=optIndex;
+  path.splice(stepIndex+1);
+  const nextId=node.options[optIndex].next;
+  path.push({id:nextId,choice:null});
+  renderDecisionTree();
+}
+function resetDecisionTree(){
+  activeBranch=null;
+  branchState.left=[{id:'prod_q1',choice:null}];
+  branchState.right=[{id:'auto_q1',choice:null}];
+  renderDecisionTree();
+  closeDrawer();
+}
+
+renderDecisionTree();
+</script>
+</body>
+</html>
